@@ -1,0 +1,30 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'AWS CloudFormation Sample Template VPC_Single_Instance_In_Subnet: Sample template showing how to create a VPC and add an EC2 instance with an Elastic IP address in a subnet. **WARNING** This template creates an Amazon EC2 instance. You will be billed for the AWS resources used if you create a stack from this template.'
+Resources:
+  VPC:
+	Type: 'AWS::EC2::VPC'
+	Properties:
+	  CidrBlock: '192.168.0.0/16'
+	Subnet:
+	  Type: 'AWS::EC2::Subnet'
+	  Properties:
+		VpcId: !Ref VPC
+		CidrBlock: '192.168.1.0/24'
+EC2Instance:
+	Type: 'AWS::EC2::Instance'
+	Properties:
+	  InstanceType: 't2.micro'
+	  ImageId: 'ami-0c55b159cbfafe1f0'
+	  SubnetId: !Ref Subnet
+	  SecurityGroupIds:
+		- !Ref InstanceSecurityGroup
+	  KeyName: 'wazWeb-keyPair'
+	  UserData:
+	  'Fn::Base64': !Sub |
+		  #!/bin/bash -xe
+		  yum update -y
+		  yum install -y httpd
+		  systemctl start httpd
+		  systemctl enable httpd
+		  echo '<html><body><h1>Hello from your web server!</h1></body></html>' > /var/www/html/index.html
